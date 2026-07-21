@@ -40,9 +40,15 @@
 .main-layout-bg {
   background-image: url('/media_genius/dasar.jpg');
   background-size: cover;
-  background-position: center;
+  background-position: center 120px;
   background-repeat: no-repeat;
   background-attachment: fixed;
+}
+
+@media (min-width: 768px) {
+  .main-layout-bg {
+    background-position: center 80px;
+  }
 }
 
 .fade-in {

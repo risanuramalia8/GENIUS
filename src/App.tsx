@@ -84,9 +84,15 @@ export default function App() {
   // General music play controls
   const playBackgroundMusic = () => {
     try {
-      if (!bgMusicRef.current) return;
+      if (!bgMusicRef.current) {
+        const audio = new Audio("/music.mp3");
+        audio.loop = true;
+        audio.volume = currentBgmVolume;
+        bgMusicRef.current = audio;
+      } else {
+        bgMusicRef.current.volume = currentBgmVolume;
+      }
 
-      bgMusicRef.current.volume = currentBgmVolume;
       const playPromise = bgMusicRef.current.play();
       playPromiseRef.current = playPromise;
 
@@ -98,9 +104,11 @@ export default function App() {
           if (error.name !== "AbortError") {
             console.warn("BGM Gagal diputar otomatis (butuh interaksi pengguna):", error);
           }
+          setIsMusicPlaying(false);
         });
     } catch (error) {
       console.warn("BGM Gagal diputar secara sinkron:", error);
+      setIsMusicPlaying(false);
     }
   };
 
@@ -108,17 +116,7 @@ export default function App() {
     setIsMusicPlaying(false);
     try {
       if (bgMusicRef.current) {
-        if (playPromiseRef.current) {
-          playPromiseRef.current
-            .then(() => {
-              if (bgMusicRef.current) {
-                bgMusicRef.current.pause();
-              }
-            })
-            .catch(() => {});
-        } else {
-          bgMusicRef.current.pause();
-        }
+        bgMusicRef.current.pause();
       }
     } catch (error) {
       console.warn("Gagal menghentikan BGM:", error);
@@ -160,7 +158,8 @@ export default function App() {
         };
 
         utterance.onerror = (e) => {
-          console.error("Kesalahan Web Speech API:", e);
+          // Log as warning instead of console.error to prevent runtime crash overlays
+          console.warn("Web Speech API event/error:", e.error);
           if (isMusicPlayingRef.current) {
             if (bgMusicRef.current) {
               bgMusicRef.current.volume = currentBgmVolume;
@@ -229,7 +228,15 @@ export default function App() {
   return (
     <div className="bg-mesh font-sans min-h-screen text-slate-800 selection:bg-brand-100 selection:text-brand-900 overflow-x-hidden flex flex-col">
       {/* 1. WELCOME SCREEN (LAYAR AWAL FULLSCREEN) */}
-      {!isStarted && <WelcomeScreen onStart={handleStart} />}
+      {!isStarted && (
+        <WelcomeScreen
+          onStart={handleStart}
+          isMusicPlaying={isMusicPlaying}
+          onToggleMusic={handleToggleMusic}
+          volume={currentBgmVolume}
+          onVolumeChange={setCurrentBgmVolume}
+        />
+      )}
 
       {/* 2. MAIN INTERACTIVE LAYOUT */}
       {isStarted && (

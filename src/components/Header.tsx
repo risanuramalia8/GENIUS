@@ -20,7 +20,7 @@ export default function Header({
   onGoHome,
 }: HeaderProps) {
   return (
-    <header className="bg-white/40 backdrop-blur-md border-b border-white/40 shadow-sm sticky top-0 z-40">
+    <header className="bg-transparent border-b border-transparent shadow-none sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-6 py-2.5 flex flex-col md:flex-row items-center justify-between gap-3">
         {/* Logo / Branding */}
         <div 
