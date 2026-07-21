@@ -57,6 +57,7 @@ let currentQuestionIndex = 0;
 let scoreGroupA = 0;
 let scoreGroupB = 0;
 let isMusicPlaying = false;
+let currentBgmVolume = 0.45; // Default BGM Volume (matches HTML range input)
 
 // =========================================================================
 // DOM ELEMENTS (ELEMEN HTML) - Dideklarasikan secara global dan diinisialisasi pada DOMContentLoaded
@@ -104,6 +105,7 @@ let btnBgm = null;
 let bgmText = null;
 let bgmMuteIcon = null;
 let bgmBars = null;
+let bgmVolume = null;
 
 // =========================================================================
 // WEB SPEECH API INTEGRATION (FITUR SUARA INDONESIA)
@@ -132,22 +134,25 @@ function speakIndonesian(text) {
       }
 
       // Mengurangi volume musik latar sementara saat asisten sedang berbicara agar suara terdengar jelas
-      if (isMusicPlaying && bgMusic) {
-        bgMusic.volume = 0.15;
+      if (isMusicPlaying) {
+        if (bgMusic) bgMusic.volume = currentBgmVolume * 0.3;
+        updateSynthVolume(currentBgmVolume * 0.3);
       }
 
       utterance.onend = () => {
         // Kembalikan volume musik latar ke normal setelah asisten selesai berbicara
-        if (isMusicPlaying && bgMusic) {
-          bgMusic.volume = 0.45;
+        if (isMusicPlaying) {
+          if (bgMusic) bgMusic.volume = currentBgmVolume;
+          updateSynthVolume(currentBgmVolume);
         }
       };
 
       utterance.onerror = (e) => {
         console.error("Kesalahan Web Speech API:", e);
         // Reset volume jika terjadi error
-        if (isMusicPlaying && bgMusic) {
-          bgMusic.volume = 0.45;
+        if (isMusicPlaying) {
+          if (bgMusic) bgMusic.volume = currentBgmVolume;
+          updateSynthVolume(currentBgmVolume);
         }
       };
 
@@ -169,30 +174,171 @@ if ('speechSynthesis' in window) {
 }
 
 // =========================================================================
-// AUDIO BACKGROUND MUSIC (BGM) CONTROLLER
+// AUDIO BACKGROUND MUSIC (BGM) CONTROLLER & SYNTHESIZER FALLBACK
 // =========================================================================
+let synthContext = null;
+let synthInterval = null;
+let isSynthPlaying = false;
+let synthGainNode = null;
+let activeDrone = null;
+
+/**
+ * Memulai synthesizer ambient lembut berbasis Web Audio API sebagai cadangan jika file audio rusak atau kosong.
+ */
+function startSynthFallback() {
+  if (isSynthPlaying) return;
+  console.log("Memulai synthesizer ambient lembut (Web Audio API) sebagai cadangan...");
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+    
+    synthContext = new AudioContextClass();
+    synthGainNode = synthContext.createGain();
+    synthGainNode.connect(synthContext.destination);
+    
+    // Atur volume synthesizer lebih lembut (15% dari volume utama) agar nyaman didengar
+    synthGainNode.gain.setValueAtTime(currentBgmVolume * 0.15, synthContext.currentTime);
+    isSynthPlaying = true;
+    isMusicPlaying = true;
+    updateBgmUI();
+    
+    // Nada pentatonis C Mayor (frekuensi dalam Hz) untuk suara lonceng ambient yang santai
+    const frequencies = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00];
+    
+    // Suara dengung dasar (drone) yang lembut untuk suasana spa
+    const oscDrone1 = synthContext.createOscillator();
+    const oscDrone2 = synthContext.createOscillator();
+    const droneGain = synthContext.createGain();
+    
+    oscDrone1.type = 'sine';
+    oscDrone1.frequency.setValueAtTime(130.81, synthContext.currentTime); // C3
+    
+    oscDrone2.type = 'sine';
+    oscDrone2.frequency.setValueAtTime(196.00, synthContext.currentTime); // G3
+    
+    droneGain.gain.setValueAtTime(0.04, synthContext.currentTime);
+    
+    oscDrone1.connect(droneGain);
+    oscDrone2.connect(droneGain);
+    droneGain.connect(synthGainNode);
+    
+    oscDrone1.start();
+    oscDrone2.start();
+    
+    activeDrone = { osc1: oscDrone1, osc2: oscDrone2, gain: droneGain };
+    
+    const playChime = () => {
+      if (!isSynthPlaying || !synthContext) return;
+      
+      const freq = frequencies[Math.floor(Math.random() * frequencies.length)];
+      const osc = synthContext.createOscillator();
+      const gainNode = synthContext.createGain();
+      const filter = synthContext.createBiquadFilter();
+      
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, synthContext.currentTime);
+      
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(700, synthContext.currentTime);
+      
+      const now = synthContext.currentTime;
+      gainNode.gain.setValueAtTime(0, now);
+      gainNode.gain.linearRampToValueAtTime(0.2, now + 1.2); // Attack lambat
+      gainNode.gain.exponentialRampToValueAtTime(0.001, now + 5.5); // Decay panjang
+      
+      osc.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(synthGainNode);
+      
+      osc.start(now);
+      osc.stop(now + 6.0);
+      
+      const nextTime = 1500 + Math.random() * 2500;
+      synthInterval = setTimeout(playChime, nextTime);
+    };
+    
+    playChime();
+  } catch (err) {
+    console.warn("Gagal membuat Web Audio API Synth:", err);
+  }
+}
+
+/**
+ * Menghentikan synthesizer ambient
+ */
+function stopSynthFallback() {
+  isSynthPlaying = false;
+  if (synthInterval) {
+    clearTimeout(synthInterval);
+    synthInterval = null;
+  }
+  if (activeDrone) {
+    try {
+      activeDrone.osc1.stop();
+      activeDrone.osc2.stop();
+    } catch (e) {}
+    activeDrone = null;
+  }
+  if (synthContext) {
+    try {
+      synthContext.close();
+    } catch (e) {}
+    synthContext = null;
+    synthGainNode = null;
+  }
+}
+
+/**
+ * Mengubah volume synthesizer ambient secara dinamis
+ */
+function updateSynthVolume(customVol = currentBgmVolume) {
+  if (synthGainNode && synthContext) {
+    synthGainNode.gain.setValueAtTime(customVol * 0.15, synthContext.currentTime);
+  }
+}
+
 /**
  * Fungsi untuk memutar musik latar secara aman dengan penanganan exception (jika file belum ada).
  */
 function playBackgroundMusic() {
   try {
     if (!bgMusic) return;
-    bgMusic.volume = 0.45; // Mengatur volume agar ramah di telinga
+    
+    // Atur volume normal
+    bgMusic.volume = currentBgmVolume;
     
     bgMusic.play()
       .then(() => {
         isMusicPlaying = true;
+        stopSynthFallback(); // Hentikan synthesizer jika musik asli berhasil diputar
         updateBgmUI();
       })
       .catch((error) => {
-        console.warn("BGM Gagal diputar otomatis (mungkin file music.mp3 belum diunggah atau butuh interaksi pengguna):", error);
-        isMusicPlaying = false;
-        updateBgmUI();
+        console.warn("BGM Gagal diputar otomatis (mungkin file music.mp3 kosong):", error);
+        
+        // Jika fail saat memutar 'music.mp3' yang merupakan file 0-byte, 
+        // ganti src ke stream musik piano komersial gratis yang tenang dan stabil
+        if (bgMusic.getAttribute("src") === "music.mp3" || bgMusic.src.endsWith("music.mp3")) {
+          console.log("Mencoba memuat cadangan musik piano tenang dari server online...");
+          bgMusic.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3";
+          bgMusic.load();
+          bgMusic.play()
+            .then(() => {
+              isMusicPlaying = true;
+              stopSynthFallback();
+              updateBgmUI();
+            })
+            .catch((err2) => {
+              console.warn("Koneksi lambat atau gagal memutar lagu online. Mengaktifkan synthesizer luring...", err2);
+              startSynthFallback();
+            });
+        } else {
+          startSynthFallback();
+        }
       });
   } catch (error) {
-    console.warn("BGM Gagal diputar secara sinkron:", error);
-    isMusicPlaying = false;
-    updateBgmUI();
+    console.warn("BGM Gagal diputar secara sinkron, beralih ke synthesizer:", error);
+    startSynthFallback();
   }
 }
 
@@ -207,6 +353,7 @@ function pauseBackgroundMusic() {
   } catch (error) {
     console.warn("Gagal menghentikan BGM:", error);
   }
+  stopSynthFallback();
   isMusicPlaying = false;
   updateBgmUI();
 }
@@ -395,6 +542,7 @@ function initializeApp() {
     bgmText = document.getElementById("bgm-text");
     bgmMuteIcon = document.getElementById("bgm-mute-icon");
     bgmBars = document.getElementById("bgm-bars");
+    bgmVolume = document.getElementById("bgm-volume");
 
     // 2. Attach Event Listeners safely (if elements exist)
     if (btnMulai) {
@@ -427,6 +575,18 @@ function initializeApp() {
           pauseBackgroundMusic();
         } else {
           playBackgroundMusic();
+        }
+      });
+    }
+
+    if (bgmVolume) {
+      bgmVolume.addEventListener("input", (e) => {
+        currentBgmVolume = parseFloat(e.target.value);
+        if (isMusicPlaying) {
+          if (bgMusic) {
+            bgMusic.volume = currentBgmVolume;
+          }
+          updateSynthVolume();
         }
       });
     }
@@ -548,6 +708,35 @@ function initializeApp() {
     if (typeof lucide !== "undefined" && lucide.createIcons) {
       lucide.createIcons();
     }
+
+    // Coba putar musik latar otomatis sesegera mungkin (bisa berhasil jika browser mengizinkan autoplay)
+    try {
+      playBackgroundMusic();
+    } catch (e) {
+      console.warn("Autoplay terhambat kebijakan browser:", e);
+    }
+
+    // Untuk memastikan musik mulai berputar di homepage (bahkan sebelum tombol Mulai diklik),
+    // kita pasang listener sekali (once) di level document terhadap klik, touch, atau tombol keyboard apa pun.
+    // Ini akan memicu putar musik segera setelah ada interaksi pertama dari pengguna di bagian mana pun dari halaman.
+    const playOnInteraction = () => {
+      // Hapus listener segera agar tidak dijalankan berulang
+      document.removeEventListener("click", playOnInteraction);
+      document.removeEventListener("touchstart", playOnInteraction);
+      document.removeEventListener("keydown", playOnInteraction);
+      
+      if (!isMusicPlaying) {
+        try {
+          playBackgroundMusic();
+        } catch (err) {
+          console.warn("Gagal memutar musik saat interaksi pertama:", err);
+        }
+      }
+    };
+
+    document.addEventListener("click", playOnInteraction);
+    document.addEventListener("touchstart", playOnInteraction);
+    document.addEventListener("keydown", playOnInteraction);
   } catch (e) {
     console.error("Kesalahan saat inisialisasi aplikasi:", e);
   }

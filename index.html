@@ -121,8 +121,8 @@
           
           <!-- Logo / Branding -->
           <div class="flex items-center gap-3">
-            <div class="bg-gradient-to-tr from-brand-500 to-emerald-400 p-2.5 rounded-2xl text-white shadow-md shadow-brand-500/10">
-              <i data-lucide="heart-handshake" class="w-7 h-7"></i>
+            <div class="w-12 h-12 flex items-center justify-center shrink-0 rounded-2xl overflow-hidden bg-white/80 p-1 shadow-md border border-white/40">
+              <img src="Logo GENIUS.png" alt="Logo GENIUS" class="w-full h-full object-contain" referrerPolicy="no-referrer">
             </div>
             <div>
               <h2 class="font-display font-bold text-2xl tracking-tight text-slate-800">GENIUS</h2>
@@ -144,19 +144,27 @@
 
           <!-- Sound Controller & Fullscreen Control -->
           <div class="flex items-center gap-3">
-            <!-- Floating BGM Toggle -->
-            <button id="btn-bgm" class="flex items-center gap-2 bg-white/30 backdrop-blur-md hover:bg-white/50 border border-white/40 text-slate-800 font-bold px-4 py-2 rounded-xl transition-all duration-300 cursor-pointer text-xs">
-              <div class="relative w-4 h-4 flex items-center justify-center">
-                <!-- Simple animation bars when audio is active -->
-                <span id="bgm-bars" class="absolute inset-0 flex items-end justify-between hidden">
-                  <span class="w-[2px] bg-brand-500 h-3 animate-[pulse_0.8s_infinite]"></span>
-                  <span class="w-[2px] bg-brand-500 h-4 animate-[pulse_1.2s_infinite]"></span>
-                  <span class="w-[2px] bg-brand-500 h-2 animate-[pulse_0.6s_infinite]"></span>
-                </span>
-                <i id="bgm-mute-icon" data-lucide="music" class="w-4 h-4"></i>
+            <!-- Floating BGM Controller (Button + Volume Slider) -->
+            <div class="flex flex-col items-stretch gap-1.5 min-w-[130px]">
+              <button id="btn-bgm" class="w-full flex items-center justify-center gap-2 bg-white/30 backdrop-blur-md hover:bg-white/50 border border-white/40 text-slate-800 font-bold px-3 py-1.5 rounded-xl transition-all duration-300 cursor-pointer text-xs">
+                <div class="relative w-4 h-4 flex items-center justify-center">
+                  <!-- Simple animation bars when audio is active -->
+                  <span id="bgm-bars" class="absolute inset-0 flex items-end justify-between hidden">
+                    <span class="w-[2px] bg-brand-500 h-3 animate-[pulse_0.8s_infinite]"></span>
+                    <span class="w-[2px] bg-brand-500 h-4 animate-[pulse_1.2s_infinite]"></span>
+                    <span class="w-[2px] bg-brand-500 h-2 animate-[pulse_0.6s_infinite]"></span>
+                  </span>
+                  <i id="bgm-mute-icon" data-lucide="music" class="w-4 h-4"></i>
+                </div>
+                <span id="bgm-text">BGM: Off</span>
+              </button>
+              
+              <!-- Volume Slider Bar -->
+              <div class="flex items-center gap-1.5 bg-white/30 backdrop-blur-md px-2 py-1 rounded-lg border border-white/40">
+                <i data-lucide="volume-1" class="w-3.5 h-3.5 text-slate-600 shrink-0"></i>
+                <input id="bgm-volume" type="range" min="0" max="1" step="0.05" value="0.45" class="w-full h-1 bg-slate-200/50 rounded-lg appearance-none cursor-pointer accent-brand-500 hover:accent-brand-600 transition-all duration-300" title="Atur Volume BGM">
               </div>
-              <span id="bgm-text">BGM: Off</span>
-            </button>
+            </div>
 
             <!-- Screen Indicator Helper for LCD projector -->
             <div class="hidden lg:flex items-center gap-2 text-xs bg-white/40 backdrop-blur-md text-brand-800 px-3.5 py-2 rounded-xl font-semibold border border-white/50">
