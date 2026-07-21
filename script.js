@@ -120,45 +120,49 @@ const bgmBars = document.getElementById("bgm-bars");
  * @param {string} text - Teks yang akan diucapkan
  */
 function speakIndonesian(text) {
-  if ('speechSynthesis' in window) {
-    // Selalu batalkan suara yang sedang berjalan terlebih dahulu
-    window.speechSynthesis.cancel();
+  try {
+    if ('speechSynthesis' in window) {
+      // Selalu batalkan suara yang sedang berjalan terlebih dahulu
+      window.speechSynthesis.cancel();
 
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'id-ID';
-    utterance.rate = 1.0;  // Kecepatan normal
-    utterance.pitch = 1.0; // Nada suara normal
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'id-ID';
+      utterance.rate = 1.0;  // Kecepatan normal
+      utterance.pitch = 1.0; // Nada suara normal
 
-    // Cari suara spesifik Bahasa Indonesia jika tersedia di peranti pengguna
-    const voices = window.speechSynthesis.getVoices();
-    const indonesianVoice = voices.find(voice => voice.lang.includes('id') || voice.lang.includes('ID'));
-    if (indonesianVoice) {
-      utterance.voice = indonesianVoice;
-    }
-
-    // Mengurangi volume musik latar sementara saat asisten sedang berbicara agar suara terdengar jelas
-    if (isMusicPlaying) {
-      bgMusic.volume = 0.15;
-    }
-
-    utterance.onend = () => {
-      // Kembalikan volume musik latar ke normal setelah asisten selesai berbicara
-      if (isMusicPlaying) {
-        bgMusic.volume = 0.45;
+      // Cari suara spesifik Bahasa Indonesia jika tersedia di peranti pengguna
+      const voices = window.speechSynthesis.getVoices();
+      const indonesianVoice = voices.find(voice => voice.lang.includes('id') || voice.lang.includes('ID'));
+      if (indonesianVoice) {
+        utterance.voice = indonesianVoice;
       }
-    };
 
-    utterance.onerror = (e) => {
-      console.error("Kesalahan Web Speech API:", e);
-      // Reset volume jika terjadi error
-      if (isMusicPlaying) {
-        bgMusic.volume = 0.45;
+      // Mengurangi volume musik latar sementara saat asisten sedang berbicara agar suara terdengar jelas
+      if (isMusicPlaying && bgMusic) {
+        bgMusic.volume = 0.15;
       }
-    };
 
-    window.speechSynthesis.speak(utterance);
-  } else {
-    console.warn("Browser ini tidak mendukung fitur pembaca suara (Web Speech API).");
+      utterance.onend = () => {
+        // Kembalikan volume musik latar ke normal setelah asisten selesai berbicara
+        if (isMusicPlaying && bgMusic) {
+          bgMusic.volume = 0.45;
+        }
+      };
+
+      utterance.onerror = (e) => {
+        console.error("Kesalahan Web Speech API:", e);
+        // Reset volume jika terjadi error
+        if (isMusicPlaying && bgMusic) {
+          bgMusic.volume = 0.45;
+        }
+      };
+
+      window.speechSynthesis.speak(utterance);
+    } else {
+      console.warn("Browser ini tidak mendukung fitur pembaca suara (Web Speech API).");
+    }
+  } catch (error) {
+    console.warn("Speech synthesis error (probably inside restricted sandbox environment):", error);
   }
 }
 
@@ -177,25 +181,38 @@ if ('speechSynthesis' in window) {
  * Fungsi untuk memutar musik latar secara aman dengan penanganan exception (jika file belum ada).
  */
 function playBackgroundMusic() {
-  bgMusic.volume = 0.45; // Mengatur volume agar ramah di telinga
-  
-  bgMusic.play()
-    .then(() => {
-      isMusicPlaying = true;
-      updateBgmUI();
-    })
-    .catch((error) => {
-      console.warn("BGM Gagal diputar otomatis (mungkin file music.mp3 belum diunggah atau butuh interaksi pengguna):", error);
-      isMusicPlaying = false;
-      updateBgmUI();
-    });
+  try {
+    if (!bgMusic) return;
+    bgMusic.volume = 0.45; // Mengatur volume agar ramah di telinga
+    
+    bgMusic.play()
+      .then(() => {
+        isMusicPlaying = true;
+        updateBgmUI();
+      })
+      .catch((error) => {
+        console.warn("BGM Gagal diputar otomatis (mungkin file music.mp3 belum diunggah atau butuh interaksi pengguna):", error);
+        isMusicPlaying = false;
+        updateBgmUI();
+      });
+  } catch (error) {
+    console.warn("BGM Gagal diputar secara sinkron:", error);
+    isMusicPlaying = false;
+    updateBgmUI();
+  }
 }
 
 /**
  * Fungsi untuk menghentikan musik latar sementara
  */
 function pauseBackgroundMusic() {
-  bgMusic.pause();
+  try {
+    if (bgMusic) {
+      bgMusic.pause();
+    }
+  } catch (error) {
+    console.warn("Gagal menghentikan BGM:", error);
+  }
   isMusicPlaying = false;
   updateBgmUI();
 }
@@ -439,27 +456,60 @@ btnNextQuestion.addEventListener("click", () => {
 // =========================================================================
 // INITIAL WELCOME SCREEN BUTTON ACTION (MEMULAI APLIKASI)
 // =========================================================================
-btnMulai.addEventListener("click", () => {
-  // 1. Hilangkan Welcome Screen dengan animasi halus atau langsung
-  welcomeScreen.classList.add("hidden");
-  
-  // 2. Munculkan layout utama
-  mainLayout.classList.remove("hidden");
+if (btnMulai) {
+  btnMulai.addEventListener("click", () => {
+    try {
+      // 1. Hilangkan Welcome Screen dengan animasi halus atau langsung
+      if (welcomeScreen) {
+        welcomeScreen.classList.add("hidden");
+      }
+      
+      // 2. Munculkan layout utama
+      if (mainLayout) {
+        mainLayout.classList.remove("hidden");
+      }
 
-  // 3. Putar Musik Latar (BGM) loop
-  playBackgroundMusic();
+      // 3. Putar Musik Latar (BGM) loop
+      try {
+        playBackgroundMusic();
+      } catch (err) {
+        console.warn("BGM play failed inside click handler:", err);
+      }
 
-  // 4. Gunakan Web Speech API untuk mengucapkan kalimat sambutan hangat
-  const sambutan = "Selamat datang dalam edukasi Nutri Level untuk kesehatan ibu hamil.";
-  speakIndonesian(sambutan);
+      // 4. Gunakan Web Speech API untuk mengucapkan kalimat sambutan hangat
+      try {
+        const sambutan = "Selamat datang dalam edukasi Nutri Level untuk kesehatan ibu hamil.";
+        speakIndonesian(sambutan);
+      } catch (err) {
+        console.warn("Speech Synthesis failed inside click handler:", err);
+      }
 
-  // 5. Inisialisasi materi edukasi awal (slide ke-0)
-  currentSlideIndex = 0;
-  renderSlide(currentSlideIndex);
-});
+      // 5. Inisialisasi materi edukasi awal (slide ke-0)
+      currentSlideIndex = 0;
+      try {
+        renderSlide(currentSlideIndex);
+      } catch (err) {
+        console.error("Gagal me-render slide pertama:", err);
+      }
+    } catch (globalErr) {
+      console.error("Kesalahan umum saat memulai aplikasi:", globalErr);
+    }
+  });
+}
 
-// Inisialisasi awal saat dokumen selesai dimuat
-document.addEventListener("DOMContentLoaded", () => {
-  // Render Lucide Icons untuk semua elemen di layar awal
-  lucide.createIcons();
-});
+// Inisialisasi awal saat dokumen selesai dimuat secara tangguh (robust ready check)
+function initializeApp() {
+  try {
+    if (typeof lucide !== "undefined" && lucide.createIcons) {
+      lucide.createIcons();
+    }
+  } catch (e) {
+    console.warn("Gagal merender ikon lucide saat start:", e);
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeApp);
+} else {
+  initializeApp();
+}
