@@ -59,57 +59,51 @@ let scoreGroupB = 0;
 let isMusicPlaying = false;
 
 // =========================================================================
-// DOM ELEMENTS (ELEMEN HTML)
+// DOM ELEMENTS (ELEMEN HTML) - Dideklarasikan secara global dan diinisialisasi pada DOMContentLoaded
 // =========================================================================
-// Audio & Welcome Screen
-const bgMusic = document.getElementById("bg-music");
-const welcomeScreen = document.getElementById("welcome-screen");
-const btnMulai = document.getElementById("btn-mulai");
-const mainLayout = document.getElementById("main-layout");
+let bgMusic = null;
+let welcomeScreen = null;
+let btnMulai = null;
+let mainLayout = null;
 
-// Navigation Tabs
-const tabMateri = document.getElementById("tab-materi");
-const tabKuis = document.getElementById("tab-kuis");
-const contentMateri = document.getElementById("content-materi");
-const contentKuis = document.getElementById("content-kuis");
+let tabMateri = null;
+let tabKuis = null;
+let contentMateri = null;
+let contentKuis = null;
 
-// Slide Materi Elements
-const slideIndexText = document.getElementById("slide-index");
-const slideTotalText = document.getElementById("slide-total");
-const slideTitle = document.getElementById("slide-title");
-const slideTextContent = document.getElementById("slide-text");
-const slideIcon = document.getElementById("slide-icon");
-const slideBgIcon = document.getElementById("slide-bg-icon");
-const btnPrev = document.getElementById("btn-prev");
-const btnNext = document.getElementById("btn-next");
-const slideDots = document.querySelectorAll(".slide-dot");
+let slideIndexText = null;
+let slideTotalText = null;
+let slideTitle = null;
+let slideTextContent = null;
+let slideIcon = null;
+let slideBgIcon = null;
+let btnPrev = null;
+let btnNext = null;
+let slideDots = [];
 
-// Scoreboard Elements
-const scoreTextA = document.getElementById("score-a");
-const scoreTextB = document.getElementById("score-b");
-const btnPlusA = document.getElementById("btn-plus-a");
-const btnMinusA = document.getElementById("btn-minus-a");
-const btnPlusB = document.getElementById("btn-plus-b");
-const btnMinusB = document.getElementById("btn-minus-b");
-const btnResetScores = document.getElementById("btn-reset-scores");
+let scoreTextA = null;
+let scoreTextB = null;
+let btnPlusA = null;
+let btnMinusA = null;
+let btnPlusB = null;
+let btnMinusB = null;
+let btnResetScores = null;
 
-// Quiz Elements
-const labelSoal = document.getElementById("label-soal");
-const questionText = document.getElementById("question-text");
-const controlShowAnswerContainer = document.getElementById("control-show-answer-container");
-const btnShowAnswer = document.getElementById("btn-show-answer");
-const jawabanPanel = document.getElementById("jawaban-panel");
-const answerText = document.getElementById("answer-text");
-const explanationText = document.getElementById("explanation-text");
+let labelSoal = null;
+let questionText = null;
+let controlShowAnswerContainer = null;
+let btnShowAnswer = null;
+let jawabanPanel = null;
+let answerText = null;
+let explanationText = null;
 
-// Speak & Action Buttons
-const btnReadQuestion = document.getElementById("btn-read-question");
-const btnReadExplanation = document.getElementById("btn-read-explanation");
-const btnNextQuestion = document.getElementById("btn-next-question");
-const btnBgm = document.getElementById("btn-bgm");
-const bgmText = document.getElementById("bgm-text");
-const bgmMuteIcon = document.getElementById("bgm-mute-icon");
-const bgmBars = document.getElementById("bgm-bars");
+let btnReadQuestion = null;
+let btnReadExplanation = null;
+let btnNextQuestion = null;
+let btnBgm = null;
+let bgmText = null;
+let bgmMuteIcon = null;
+let bgmBars = null;
 
 // =========================================================================
 // WEB SPEECH API INTEGRATION (FITUR SUARA INDONESIA)
@@ -236,16 +230,6 @@ function updateBgmUI() {
   }
 }
 
-// Handler klik tombol BGM
-btnBgm.addEventListener("click", () => {
-  if (isMusicPlaying) {
-    pauseBackgroundMusic();
-  } else {
-    playBackgroundMusic();
-  }
-});
-
-
 // =========================================================================
 // TAB SWITCHER LOGIC (MATERI EDUKASI VS KUIS)
 // =========================================================================
@@ -257,134 +241,81 @@ function switchTab(activeTab) {
 
   if (activeTab === "materi") {
     // Tampilan Tab Materi Aktif
-    contentMateri.classList.remove("hidden");
-    contentKuis.classList.add("hidden");
+    if (contentMateri) contentMateri.classList.remove("hidden");
+    if (contentKuis) contentKuis.classList.add("hidden");
 
-    tabMateri.className = "flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 cursor-pointer bg-white/85 text-brand-800 shadow-sm";
-    tabKuis.className = "flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 cursor-pointer text-slate-700 hover:text-slate-900 hover:bg-white/10";
+    if (tabMateri) tabMateri.className = "flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 cursor-pointer bg-white/85 text-brand-800 shadow-sm";
+    if (tabKuis) tabKuis.className = "flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 cursor-pointer text-slate-700 hover:text-slate-900 hover:bg-white/10";
   } else {
     // Tampilan Tab Kuis Aktif
-    contentKuis.classList.remove("hidden");
-    contentMateri.classList.add("hidden");
+    if (contentKuis) contentKuis.classList.remove("hidden");
+    if (contentMateri) contentMateri.classList.add("hidden");
 
-    tabKuis.className = "flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 cursor-pointer bg-white/85 text-brand-800 shadow-sm";
-    tabMateri.className = "flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 cursor-pointer text-slate-700 hover:text-slate-900 hover:bg-white/10";
+    if (tabKuis) tabKuis.className = "flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 cursor-pointer bg-white/85 text-brand-800 shadow-sm";
+    if (tabMateri) tabMateri.className = "flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 cursor-pointer text-slate-700 hover:text-slate-900 hover:bg-white/10";
     
     // Inisialisasi pertanyaan pertama saat tab kuis dibuka
     loadQuizQuestion(currentQuestionIndex);
   }
 }
 
-tabMateri.addEventListener("click", () => switchTab("materi"));
-tabKuis.addEventListener("click", () => switchTab("kuis"));
-
-
 // =========================================================================
 // SLIDER / CAROUSEL MATERI EDUKASI
 // =========================================================================
 function renderSlide(index) {
   const currentSlide = slides[index];
+  if (!currentSlide) return;
   
   // Set teks
-  slideIndexText.textContent = index + 1;
-  slideTotalText.textContent = slides.length;
-  slideTitle.textContent = currentSlide.title;
-  slideTextContent.textContent = currentSlide.text;
+  if (slideIndexText) slideIndexText.textContent = index + 1;
+  if (slideTotalText) slideTotalText.textContent = slides.length;
+  if (slideTitle) slideTitle.textContent = currentSlide.title;
+  if (slideTextContent) slideTextContent.textContent = currentSlide.text;
 
   // Set icon dinamis dengan mengganti atribut data-lucide
-  slideIcon.setAttribute("data-lucide", currentSlide.icon);
-  slideBgIcon.setAttribute("data-lucide", currentSlide.bgIcon);
+  if (slideIcon) {
+    slideIcon.setAttribute("data-lucide", currentSlide.icon);
+  }
+  if (slideBgIcon) {
+    slideBgIcon.setAttribute("data-lucide", currentSlide.bgIcon);
+  }
 
   // Re-render Lucide Icons agar SVG ter-update
-  lucide.createIcons();
+  if (typeof lucide !== "undefined" && lucide.createIcons) {
+    lucide.createIcons();
+  }
 
   // Update indikator titik (dot)
-  slideDots.forEach((dot, dotIdx) => {
-    if (dotIdx === index) {
-      dot.className = "slide-dot w-6 h-3.5 rounded-full bg-brand-500 transition-all duration-300";
-    } else {
-      dot.className = "slide-dot w-3.5 h-3.5 rounded-full bg-slate-200 hover:bg-slate-300 transition-all duration-300 cursor-pointer";
-    }
-  });
+  if (slideDots) {
+    slideDots.forEach((dot, dotIdx) => {
+      if (dotIdx === index) {
+        dot.className = "slide-dot w-6 h-3.5 rounded-full bg-brand-500 transition-all duration-300";
+      } else {
+        dot.className = "slide-dot w-3.5 h-3.5 rounded-full bg-slate-200 hover:bg-slate-300 transition-all duration-300 cursor-pointer";
+      }
+    });
+  }
 
   // Atur state keaktifan tombol navigasi slide
-  btnPrev.disabled = index === 0;
-  btnNext.innerHTML = index === slides.length - 1 
-    ? '<span>Selesai Belajar</span> <i data-lucide="check-circle" class="w-5 h-5"></i>' 
-    : '<span>Selanjutnya</span> <i data-lucide="arrow-right" class="w-5 h-5"></i>';
+  if (btnPrev) btnPrev.disabled = index === 0;
+  if (btnNext) {
+    btnNext.innerHTML = index === slides.length - 1 
+      ? '<span>Selesai Belajar</span> <i data-lucide="check-circle" class="w-5 h-5"></i>' 
+      : '<span>Selanjutnya</span> <i data-lucide="arrow-right" class="w-5 h-5"></i>';
+  }
   
-  lucide.createIcons();
+  if (typeof lucide !== "undefined" && lucide.createIcons) {
+    lucide.createIcons();
+  }
 }
-
-// Handler Navigasi Slider
-btnPrev.addEventListener("click", () => {
-  if (currentSlideIndex > 0) {
-    currentSlideIndex--;
-    renderSlide(currentSlideIndex);
-  }
-});
-
-btnNext.addEventListener("click", () => {
-  if (currentSlideIndex < slides.length - 1) {
-    currentSlideIndex++;
-    renderSlide(currentSlideIndex);
-  } else {
-    // Jika materi terakhir selesai dibaca, arahkan otomatis ke tab kuis
-    switchTab("kuis");
-  }
-});
-
-// Klik langsung pada titik indikator (dots) untuk berpindah materi
-slideDots.forEach((dot, dotIdx) => {
-  dot.addEventListener("click", () => {
-    currentSlideIndex = dotIdx;
-    renderSlide(currentSlideIndex);
-  });
-});
-
 
 // =========================================================================
 // PAPAN SKOR KELOMPOK (SCOREBOARD LOGIC)
 // =========================================================================
 function updateScoreboard() {
-  scoreTextA.textContent = scoreGroupA;
-  scoreTextB.textContent = scoreGroupB;
+  if (scoreTextA) scoreTextA.textContent = scoreGroupA;
+  if (scoreTextB) scoreTextB.textContent = scoreGroupB;
 }
-
-// Kelompok A
-btnPlusA.addEventListener("click", () => {
-  scoreGroupA++;
-  updateScoreboard();
-});
-btnMinusA.addEventListener("click", () => {
-  if (scoreGroupA > 0) {
-    scoreGroupA--;
-    updateScoreboard();
-  }
-});
-
-// Kelompok B
-btnPlusB.addEventListener("click", () => {
-  scoreGroupB++;
-  updateScoreboard();
-});
-btnMinusB.addEventListener("click", () => {
-  if (scoreGroupB > 0) {
-    scoreGroupB--;
-    updateScoreboard();
-  }
-});
-
-// Reset Skor Kembali ke Nol
-btnResetScores.addEventListener("click", () => {
-  const konfirmasi = confirm("Apakah Anda yakin ingin me-reset skor Kelompok A dan Kelompok B kembali ke 0?");
-  if (konfirmasi) {
-    scoreGroupA = 0;
-    scoreGroupB = 0;
-    updateScoreboard();
-  }
-});
-
 
 // =========================================================================
 // LOGIKA GAME VERSUS KUIS (CORE SYSTEM)
@@ -394,120 +325,235 @@ function loadQuizQuestion(index) {
   const soalData = kuisSoal[index];
 
   if (!soalData) {
-    questionText.textContent = "Kuis Selesai! Terima kasih telah berpartisipasi.";
-    btnReadQuestion.classList.add("hidden");
-    controlShowAnswerContainer.classList.add("hidden");
-    jawabanPanel.classList.add("hidden");
+    if (questionText) questionText.textContent = "Kuis Selesai! Terima kasih telah berpartisipasi.";
+    if (btnReadQuestion) btnReadQuestion.classList.add("hidden");
+    if (controlShowAnswerContainer) controlShowAnswerContainer.classList.add("hidden");
+    if (jawabanPanel) jawabanPanel.classList.add("hidden");
     return;
   }
 
   // Update label dinamis
-  labelSoal.textContent = `Soal ${index + 1} dari ${kuisSoal.length}`;
+  if (labelSoal) labelSoal.textContent = `Soal ${index + 1} dari ${kuisSoal.length}`;
   
   // Set teks soal, jawaban, dan penjelasan
-  questionText.textContent = soalData.kasus;
-  answerText.textContent = soalData.jawaban;
-  explanationText.textContent = soalData.penjelasan;
+  if (questionText) questionText.textContent = soalData.kasus;
+  if (answerText) answerText.textContent = soalData.jawaban;
+  if (explanationText) explanationText.textContent = soalData.penjelasan;
 
   // Sembunyikan panel jawaban terlebih dahulu (persiapan tampil soal baru)
-  jawabanPanel.classList.add("hidden");
-  controlShowAnswerContainer.classList.remove("hidden");
+  if (jawabanPanel) jawabanPanel.classList.add("hidden");
+  if (controlShowAnswerContainer) controlShowAnswerContainer.classList.remove("hidden");
 }
 
-// Tombol Tampilkan Jawaban
-btnShowAnswer.addEventListener("click", () => {
-  // Sembunyikan tombol "Tampilkan Jawaban" sendiri
-  controlShowAnswerContainer.classList.add("hidden");
-  // Munculkan panel jawaban lengkap dengan animasi fade-in
-  jawabanPanel.classList.remove("hidden");
-});
-
-// Tombol Bacakan Soal (Web Speech API)
-btnReadQuestion.addEventListener("click", () => {
-  const soalData = kuisSoal[currentQuestionIndex];
-  if (soalData) {
-    speakIndonesian(soalData.kasus);
-  }
-});
-
-// Tombol Bacakan Penjelasan (Membacakan jawaban + penjelasan sekaligus)
-btnReadExplanation.addEventListener("click", () => {
-  const soalData = kuisSoal[currentQuestionIndex];
-  if (soalData) {
-    const teksBacakan = `Jawaban: ${soalData.jawaban}. Penjelasan: ${soalData.penjelasan}`;
-    speakIndonesian(teksBacakan);
-  }
-});
-
-// Tombol Soal Selanjutnya
-btnNextQuestion.addEventListener("click", () => {
-  // Increment indeks kuis
-  currentQuestionIndex++;
-  
-  // Loop kembali ke indeks awal jika sudah melebihi jumlah soal (memungkinkan perulangan interaktif)
-  if (currentQuestionIndex >= kuisSoal.length) {
-    currentQuestionIndex = 0;
-  }
-
-  loadQuizQuestion(currentQuestionIndex);
-});
-
-
 // =========================================================================
-// INITIAL WELCOME SCREEN BUTTON ACTION (MEMULAI APLIKASI)
+// INITIALIZATION AND EVENT LISTENERS
 // =========================================================================
-if (btnMulai) {
-  btnMulai.addEventListener("click", () => {
-    try {
-      // 1. Hilangkan Welcome Screen dengan animasi halus atau langsung
-      if (welcomeScreen) {
-        welcomeScreen.classList.add("hidden");
-      }
-      
-      // 2. Munculkan layout utama
-      if (mainLayout) {
-        mainLayout.classList.remove("hidden");
-      }
 
-      // 3. Putar Musik Latar (BGM) loop
-      try {
-        playBackgroundMusic();
-      } catch (err) {
-        console.warn("BGM play failed inside click handler:", err);
-      }
-
-      // 4. Gunakan Web Speech API untuk mengucapkan kalimat sambutan hangat
-      try {
-        const sambutan = "Selamat datang dalam edukasi Nutri Level untuk kesehatan ibu hamil.";
-        speakIndonesian(sambutan);
-      } catch (err) {
-        console.warn("Speech Synthesis failed inside click handler:", err);
-      }
-
-      // 5. Inisialisasi materi edukasi awal (slide ke-0)
-      currentSlideIndex = 0;
-      try {
-        renderSlide(currentSlideIndex);
-      } catch (err) {
-        console.error("Gagal me-render slide pertama:", err);
-      }
-    } catch (globalErr) {
-      console.error("Kesalahan umum saat memulai aplikasi:", globalErr);
-    }
-  });
-}
-
-// Inisialisasi awal saat dokumen selesai dimuat secara tangguh (robust ready check)
 function initializeApp() {
   try {
+    // 1. Query all DOM Elements
+    bgMusic = document.getElementById("bg-music");
+    welcomeScreen = document.getElementById("welcome-screen");
+    btnMulai = document.getElementById("btn-mulai");
+    mainLayout = document.getElementById("main-layout");
+
+    tabMateri = document.getElementById("tab-materi");
+    tabKuis = document.getElementById("tab-kuis");
+    contentMateri = document.getElementById("content-materi");
+    contentKuis = document.getElementById("content-kuis");
+
+    slideIndexText = document.getElementById("slide-index");
+    slideTotalText = document.getElementById("slide-total");
+    slideTitle = document.getElementById("slide-title");
+    slideTextContent = document.getElementById("slide-text");
+    slideIcon = document.getElementById("slide-icon");
+    slideBgIcon = document.getElementById("slide-bg-icon");
+    btnPrev = document.getElementById("btn-prev");
+    btnNext = document.getElementById("btn-next");
+    slideDots = document.querySelectorAll(".slide-dot");
+
+    scoreTextA = document.getElementById("score-a");
+    scoreTextB = document.getElementById("score-b");
+    btnPlusA = document.getElementById("btn-plus-a");
+    btnMinusA = document.getElementById("btn-minus-a");
+    btnPlusB = document.getElementById("btn-plus-b");
+    btnMinusB = document.getElementById("btn-minus-b");
+    btnResetScores = document.getElementById("btn-reset-scores");
+
+    labelSoal = document.getElementById("label-soal");
+    questionText = document.getElementById("question-text");
+    controlShowAnswerContainer = document.getElementById("control-show-answer-container");
+    btnShowAnswer = document.getElementById("btn-show-answer");
+    jawabanPanel = document.getElementById("jawaban-panel");
+    answerText = document.getElementById("answer-text");
+    explanationText = document.getElementById("explanation-text");
+
+    btnReadQuestion = document.getElementById("btn-read-question");
+    btnReadExplanation = document.getElementById("btn-read-explanation");
+    btnNextQuestion = document.getElementById("btn-next-question");
+    btnBgm = document.getElementById("btn-bgm");
+    bgmText = document.getElementById("bgm-text");
+    bgmMuteIcon = document.getElementById("bgm-mute-icon");
+    bgmBars = document.getElementById("bgm-bars");
+
+    // 2. Attach Event Listeners safely (if elements exist)
+    if (btnMulai) {
+      btnMulai.addEventListener("click", () => {
+        try {
+          if (welcomeScreen) welcomeScreen.classList.add("hidden");
+          if (mainLayout) mainLayout.classList.remove("hidden");
+          try {
+            playBackgroundMusic();
+          } catch (err) {
+            console.warn("BGM play failed inside click handler:", err);
+          }
+          try {
+            const sambutan = "Selamat datang dalam edukasi Nutri Level untuk kesehatan ibu hamil.";
+            speakIndonesian(sambutan);
+          } catch (err) {
+            console.warn("Speech Synthesis failed inside click handler:", err);
+          }
+          currentSlideIndex = 0;
+          renderSlide(currentSlideIndex);
+        } catch (globalErr) {
+          console.error("Kesalahan umum saat memulai aplikasi:", globalErr);
+        }
+      });
+    }
+
+    if (btnBgm) {
+      btnBgm.addEventListener("click", () => {
+        if (isMusicPlaying) {
+          pauseBackgroundMusic();
+        } else {
+          playBackgroundMusic();
+        }
+      });
+    }
+
+    if (tabMateri) {
+      tabMateri.addEventListener("click", () => switchTab("materi"));
+    }
+    if (tabKuis) {
+      tabKuis.addEventListener("click", () => switchTab("kuis"));
+    }
+
+    if (btnPrev) {
+      btnPrev.addEventListener("click", () => {
+        if (currentSlideIndex > 0) {
+          currentSlideIndex--;
+          renderSlide(currentSlideIndex);
+        }
+      });
+    }
+
+    if (btnNext) {
+      btnNext.addEventListener("click", () => {
+        if (currentSlideIndex < slides.length - 1) {
+          currentSlideIndex++;
+          renderSlide(currentSlideIndex);
+        } else {
+          switchTab("kuis");
+        }
+      });
+    }
+
+    if (slideDots) {
+      slideDots.forEach((dot, dotIdx) => {
+        dot.addEventListener("click", () => {
+          currentSlideIndex = dotIdx;
+          renderSlide(currentSlideIndex);
+        });
+      });
+    }
+
+    if (btnPlusA) {
+      btnPlusA.addEventListener("click", () => {
+        scoreGroupA++;
+        updateScoreboard();
+      });
+    }
+    if (btnMinusA) {
+      btnMinusA.addEventListener("click", () => {
+        if (scoreGroupA > 0) {
+          scoreGroupA--;
+          updateScoreboard();
+        }
+      });
+    }
+
+    if (btnPlusB) {
+      btnPlusB.addEventListener("click", () => {
+        scoreGroupB++;
+        updateScoreboard();
+      });
+    }
+    if (btnMinusB) {
+      btnMinusB.addEventListener("click", () => {
+        if (scoreGroupB > 0) {
+          scoreGroupB--;
+          updateScoreboard();
+        }
+      });
+    }
+
+    if (btnResetScores) {
+      btnResetScores.addEventListener("click", () => {
+        const konfirmasi = confirm("Apakah Anda yakin ingin me-reset skor Kelompok A dan Kelompok B kembali ke 0?");
+        if (konfirmasi) {
+          scoreGroupA = 0;
+          scoreGroupB = 0;
+          updateScoreboard();
+        }
+      });
+    }
+
+    if (btnShowAnswer) {
+      btnShowAnswer.addEventListener("click", () => {
+        if (controlShowAnswerContainer) controlShowAnswerContainer.classList.add("hidden");
+        if (jawabanPanel) jawabanPanel.classList.remove("hidden");
+      });
+    }
+
+    if (btnReadQuestion) {
+      btnReadQuestion.addEventListener("click", () => {
+        const soalData = kuisSoal[currentQuestionIndex];
+        if (soalData) {
+          speakIndonesian(soalData.kasus);
+        }
+      });
+    }
+
+    if (btnReadExplanation) {
+      btnReadExplanation.addEventListener("click", () => {
+        const soalData = kuisSoal[currentQuestionIndex];
+        if (soalData) {
+          const teksBacakan = `Jawaban: ${soalData.jawaban}. Penjelasan: ${soalData.penjelasan}`;
+          speakIndonesian(teksBacakan);
+        }
+      });
+    }
+
+    if (btnNextQuestion) {
+      btnNextQuestion.addEventListener("click", () => {
+        currentQuestionIndex++;
+        if (currentQuestionIndex >= kuisSoal.length) {
+          currentQuestionIndex = 0;
+        }
+        loadQuizQuestion(currentQuestionIndex);
+      });
+    }
+
+    // Render Lucide Icons
     if (typeof lucide !== "undefined" && lucide.createIcons) {
       lucide.createIcons();
     }
   } catch (e) {
-    console.warn("Gagal merender ikon lucide saat start:", e);
+    console.error("Kesalahan saat inisialisasi aplikasi:", e);
   }
 }
 
+// Inisialisasi awal saat dokumen selesai dimuat secara tangguh (robust ready check)
 if (document.readyState === "loading") {
   document.addEventListener("DOMContentLoaded", initializeApp);
 } else {
