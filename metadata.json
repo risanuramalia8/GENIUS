@@ -1,0 +1,6 @@
+{
+  "name": "GENIUS (Game Edukasi Nutri-Level Interaktif Untuk Hidup Sehat)",
+  "description": "Game Edukasi Nutri-Level Interaktif Untuk Hidup Sehat, panduan nutrisi ibu hamil.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

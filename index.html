@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GENIUS: Game Edukasi Nutri-Level Interaktif Untuk Hidup Sehat</title>
+    
+    <!-- Google Fonts: Plus Jakarta Sans for UI, Space Grotesk for Display Headings -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind Custom Configuration for Teal/Toska and Accent Colors -->
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                50: '#f0fdfa',
+                100: '#ccfbf1',
+                200: '#99f6e4',
+                300: '#5eead4',
+                400: '#2dd4bf',
+                500: '#14b8a6', // Soft Teal
+                600: '#0d9488',
+                700: '#0f766e',
+                800: '#115e59',
+                900: '#134e4a',
+              },
+              accent: {
+                coral: '#ff6b6b',
+                gold: '#eab308',
+                amber: '#f59e0b',
+                rose: '#fda4af',
+              }
+            },
+            fontFamily: {
+              sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+              display: ['"Space Grotesk"', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+    
+    <!-- Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Custom Style to ensure smooth background animation and layouts -->
+    <style>
+      .bg-mesh {
+        background-color: #f8fafc;
+        background-image: 
+          radial-gradient(at 0% 0%, rgba(20, 184, 166, 0.08) 0px, transparent 50%),
+          radial-gradient(at 100% 0%, rgba(253, 164, 175, 0.08) 0px, transparent 50%),
+          radial-gradient(at 50% 100%, rgba(56, 189, 248, 0.08) 0px, transparent 50%);
+      }
+      #welcome-screen {
+        background-image: linear-gradient(rgba(15, 23, 42, 0.15), rgba(15, 23, 42, 0.3)), url('media_genius/home.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+      }
+      #main-layout {
+        background-image: linear-gradient(rgba(248, 250, 252, 0.4), rgba(248, 250, 252, 0.45)), url('media_genius/dasar.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+      }
+      .fade-in {
+        animation: fadeIn 0.5s ease-out forwards;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+    </style>
+  </head>
+  <body class="bg-mesh font-sans min-h-screen text-slate-800 selection:bg-brand-100 selection:text-brand-900 overflow-x-hidden">
+
+    <!-- Tag Audio untuk Background Music (BGM) -->
+    <!-- Menggunakan loop agar musik terus berulang -->
+    <audio id="bg-music" loop src="music.mp3"></audio>
+
+    <!-- ========================================================================= -->
+    <!-- 1. WELCOME SCREEN (LAYAR AWAL FULLSCREEN)                                 -->
+    <!-- ========================================================================= -->
+    <div id="welcome-screen" class="fixed inset-0 z-50 flex flex-col items-center justify-end pb-12 text-white p-6 overflow-y-auto">
+      
+      <div class="max-w-4xl text-center z-10 fade-in">
+
+        <!-- Start Button -->
+        <div>
+          <button id="btn-mulai" class="group relative inline-flex items-center justify-center gap-2.5 bg-white text-teal-950 font-bold text-sm md:text-base px-6 py-3 rounded-full shadow-xl hover:shadow-brand-300/20 hover:bg-teal-50 transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer">
+            <span>Mulai Edukasi</span>
+            <div class="bg-brand-600 group-hover:bg-brand-700 p-1.5 rounded-full text-white transition-colors duration-300">
+              <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </div>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ========================================================================= -->
+    <!-- 2. MAIN INTERACTIVE LAYOUT                                                -->
+    <!-- ========================================================================= -->
+    <div id="main-layout" class="hidden min-h-screen flex flex-col justify-between">
+      
+      <!-- ========================================================================= -->
+      <!-- HEADER & NAVIGATION                                                       -->
+      <!-- ========================================================================= -->
+      <header class="bg-white/40 backdrop-blur-md border-b border-white/40 shadow-sm sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+          
+          <!-- Logo / Branding -->
+          <div class="flex items-center gap-3">
+            <div class="bg-gradient-to-tr from-brand-500 to-emerald-400 p-2.5 rounded-2xl text-white shadow-md shadow-brand-500/10">
+              <i data-lucide="heart-handshake" class="w-7 h-7"></i>
+            </div>
+            <div>
+              <h2 class="font-display font-bold text-2xl tracking-tight text-slate-800">GENIUS</h2>
+              <p class="text-xs text-slate-500 font-semibold uppercase tracking-wider">Game Edukasi Nutri-Level</p>
+            </div>
+          </div>
+
+          <!-- Central Segmented Navigation Tabs -->
+          <nav class="flex bg-white/20 backdrop-blur-md p-1 rounded-2xl border border-white/30 w-full md:w-auto shadow-inner">
+            <button id="tab-materi" class="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 cursor-pointer bg-white/85 text-brand-800 shadow-sm">
+              <i data-lucide="book-open" class="w-4 h-4"></i>
+              <span>Materi Edukasi</span>
+            </button>
+            <button id="tab-kuis" class="flex-1 md:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 cursor-pointer text-slate-700 hover:text-slate-900 hover:bg-white/10">
+              <i data-lucide="trophy" class="w-4 h-4"></i>
+              <span>Versus Kuis</span>
+            </button>
+          </nav>
+
+          <!-- Sound Controller & Fullscreen Control -->
+          <div class="flex items-center gap-3">
+            <!-- Floating BGM Toggle -->
+            <button id="btn-bgm" class="flex items-center gap-2 bg-white/30 backdrop-blur-md hover:bg-white/50 border border-white/40 text-slate-800 font-bold px-4 py-2 rounded-xl transition-all duration-300 cursor-pointer text-xs">
+              <div class="relative w-4 h-4 flex items-center justify-center">
+                <!-- Simple animation bars when audio is active -->
+                <span id="bgm-bars" class="absolute inset-0 flex items-end justify-between hidden">
+                  <span class="w-[2px] bg-brand-500 h-3 animate-[pulse_0.8s_infinite]"></span>
+                  <span class="w-[2px] bg-brand-500 h-4 animate-[pulse_1.2s_infinite]"></span>
+                  <span class="w-[2px] bg-brand-500 h-2 animate-[pulse_0.6s_infinite]"></span>
+                </span>
+                <i id="bgm-mute-icon" data-lucide="music" class="w-4 h-4"></i>
+              </div>
+              <span id="bgm-text">BGM: Off</span>
+            </button>
+
+            <!-- Screen Indicator Helper for LCD projector -->
+            <div class="hidden lg:flex items-center gap-2 text-xs bg-white/40 backdrop-blur-md text-brand-800 px-3.5 py-2 rounded-xl font-semibold border border-white/50">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+              <span>Mode Proyektor LCD Aktif</span>
+            </div>
+          </div>
+
+        </div>
+      </header>
+
+      <!-- ========================================================================= -->
+      <!-- MAIN CONTAINER CONTENT                                                    -->
+      <!-- ========================================================================= -->
+      <main class="flex-grow max-w-7xl w-full mx-auto px-6 py-8 flex flex-col justify-center">
+        
+        <!-- ========================================================================= -->
+        <!-- TAB CONTENT: MATERI EDUKASI                                               -->
+        <!-- ========================================================================= -->
+        <section id="content-materi" class="fade-in max-w-4xl mx-auto w-full space-y-8">
+          <!-- Slide Container with modern glass shadow and elegant colors -->
+          <div class="bg-white/35 backdrop-blur-xl border border-white/50 rounded-3xl shadow-2xl overflow-hidden min-h-[420px] flex flex-col justify-between p-8 md:p-12 relative">
+            
+            <!-- Beautiful background icon badge overlay -->
+            <div class="absolute right-8 top-8 opacity-5 text-brand-600">
+              <i id="slide-bg-icon" data-lucide="sparkles" class="w-48 h-48"></i>
+            </div>
+
+            <!-- Header Slide Info -->
+            <div class="flex items-center justify-between z-10 border-b border-white/30 pb-6">
+              <span class="text-xs font-extrabold uppercase tracking-widest text-slate-500">Nutri-Level Edu-Series</span>
+              <div class="bg-white/50 backdrop-blur-sm text-brand-800 px-4 py-1 rounded-full text-xs font-bold border border-white/60">
+                Materi <span id="slide-index">1</span> dari <span id="slide-total">3</span>
+              </div>
+            </div>
+
+            <!-- Slide Content Center (Optimized for LCD with giant, elegant text) -->
+            <div class="my-auto py-8 z-10 space-y-6">
+              <div class="flex items-center gap-4">
+                <div id="slide-badge-container" class="p-3 bg-brand-500/15 rounded-2xl text-brand-700">
+                  <i id="slide-icon" data-lucide="info" class="w-7 h-7"></i>
+                </div>
+                <h3 id="slide-title" class="font-display font-bold text-2xl md:text-3xl text-slate-800">
+                  Slide Title
+                </h3>
+              </div>
+              <p id="slide-text" class="text-3xl md:text-4xl font-semibold leading-relaxed text-slate-800 tracking-wide">
+                Slide Text Content
+              </p>
+            </div>
+
+            <!-- Slide Navigations (sleeker, more compact) -->
+            <div class="flex items-center justify-between pt-6 border-t border-white/30 z-10">
+              <button id="btn-prev" class="flex items-center gap-2 border border-slate-300 hover:border-brand-500 hover:text-brand-600 text-slate-600 font-bold px-5 py-2.5 rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-sm">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                <span>Sebelumnya</span>
+              </button>
+
+              <!-- Progress Dots -->
+              <div class="flex gap-2.5">
+                <span class="slide-dot w-3.5 h-3.5 rounded-full bg-brand-500 transition-all duration-300"></span>
+                <span class="slide-dot w-3.5 h-3.5 rounded-full bg-slate-200 transition-all duration-300"></span>
+                <span class="slide-dot w-3.5 h-3.5 rounded-full bg-slate-200 transition-all duration-300"></span>
+              </div>
+
+              <button id="btn-next" class="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-bold px-6 py-2.5 rounded-xl shadow-lg shadow-brand-500/10 transition-all duration-300 cursor-pointer text-sm">
+                <span>Selanjutnya</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Helper Tips -->
+          <p class="text-center text-slate-400 font-medium text-sm">
+            <i data-lucide="help-circle" class="w-4 h-4 inline-block mr-1"></i> Gunakan tombol di atas atau navigasi keyboard untuk membaca materi edukasi lainnya.
+          </p>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- TAB CONTENT: VERSUS KUIS (MODE UTAMA)                                     -->
+        <!-- ========================================================================= -->
+        <section id="content-kuis" class="hidden fade-in w-full space-y-8">
+          
+          <!-- Papan Skor (Scoreboard) -->
+          <div class="grid grid-cols-2 gap-6 max-w-4xl mx-auto">
+            
+            <!-- Score Kelompok A -->
+            <div class="bg-white/40 backdrop-blur-xl border-2 border-white/50 rounded-3xl p-5 shadow-xl relative overflow-hidden flex flex-col items-center justify-between">
+              <!-- Decorative corner color -->
+              <div class="absolute top-0 left-0 w-3 h-full bg-brand-500"></div>
+              
+              <div class="text-center space-y-1">
+                <span class="text-xs font-extrabold uppercase tracking-widest text-brand-600 block">KUIS GRUP</span>
+                <h4 class="font-display font-bold text-xl text-slate-800 flex items-center gap-2 justify-center">
+                  <i data-lucide="users" class="w-5 h-5 text-brand-500"></i> Kelompok A
+                </h4>
+              </div>
+
+              <!-- Huge Score display -->
+              <div id="score-a" class="font-display font-bold text-6xl md:text-7xl text-slate-800 my-3 select-none tracking-tight">
+                0
+              </div>
+
+              <!-- Manual Admin Incrementors -->
+              <div class="flex gap-2">
+                <button id="btn-minus-a" class="bg-white/60 hover:bg-white border border-slate-200 text-slate-600 p-2.5 rounded-xl transition-all duration-300 cursor-pointer shadow-sm">
+                  <i data-lucide="minus" class="w-4 h-4"></i>
+                </button>
+                <button id="btn-plus-a" class="bg-brand-500 hover:bg-brand-600 text-white p-2.5 rounded-xl transition-all duration-300 cursor-pointer shadow-lg shadow-brand-500/15">
+                  <i data-lucide="plus" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Score Kelompok B -->
+            <div class="bg-white/40 backdrop-blur-xl border-2 border-white/50 rounded-3xl p-5 shadow-xl relative overflow-hidden flex flex-col items-center justify-between">
+              <!-- Decorative corner color -->
+              <div class="absolute top-0 right-0 w-3 h-full bg-indigo-500"></div>
+
+              <div class="text-center space-y-1">
+                <span class="text-xs font-extrabold uppercase tracking-widest text-indigo-600 block">KUIS GRUP</span>
+                <h4 class="font-display font-bold text-xl text-slate-800 flex items-center gap-2 justify-center">
+                  <i data-lucide="users" class="w-5 h-5 text-indigo-500"></i> Kelompok B
+                </h4>
+              </div>
+
+              <!-- Huge Score display -->
+              <div id="score-b" class="font-display font-bold text-6xl md:text-7xl text-slate-800 my-3 select-none tracking-tight">
+                0
+              </div>
+
+              <!-- Manual Admin Incrementors -->
+              <div class="flex gap-2">
+                <button id="btn-minus-b" class="bg-white/60 hover:bg-white border border-slate-200 text-slate-600 p-2.5 rounded-xl transition-all duration-300 cursor-pointer shadow-sm">
+                  <i data-lucide="minus" class="w-4 h-4"></i>
+                </button>
+                <button id="btn-plus-b" class="bg-indigo-500 hover:bg-indigo-600 text-white p-2.5 rounded-xl transition-all duration-300 cursor-pointer shadow-lg shadow-indigo-500/15">
+                  <i data-lucide="plus" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Tampilan Soal & Jawaban Panel -->
+          <div class="max-w-4xl mx-auto bg-white/35 backdrop-blur-xl border border-white/50 rounded-3xl shadow-2xl p-8 md:p-12 relative space-y-8">
+            
+            <!-- Badging and Voice Button Header -->
+            <div class="flex flex-col sm:flex-row items-center justify-between border-b border-white/30 pb-6 gap-4">
+              <div class="flex items-center gap-3">
+                <span class="flex h-3 w-3 relative">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                </span>
+                <span id="label-soal" class="text-sm font-bold uppercase tracking-wider text-slate-600">Pertanyaan Soal Uji Coba</span>
+              </div>
+              
+              <!-- Voice Speaker for Question (sleeker size) -->
+              <button id="btn-read-question" class="flex items-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-800 border border-emerald-500/25 px-4 py-2 rounded-xl font-bold text-xs tracking-wide transition-all duration-300 cursor-pointer">
+                <i data-lucide="volume-2" class="w-4 h-4 animate-[pulse_1.5s_infinite]"></i>
+                <span>🔊 Bacakan Soal</span>
+              </button>
+            </div>
+
+            <!-- Teks Kasus / Soal (Extremely huge and clean for projection) -->
+            <div class="py-4">
+              <h3 id="question-text" class="font-display font-semibold text-3xl md:text-4xl lg:text-5xl text-slate-800 leading-relaxed tracking-wide text-center">
+                Memuat Soal...
+              </h3>
+            </div>
+
+            <!-- Primary Control: Tampilkan Jawaban (sleeker size) -->
+            <div id="control-show-answer-container" class="flex justify-center pt-4">
+              <button id="btn-show-answer" class="bg-amber-500 hover:bg-amber-600 text-white font-bold text-lg px-8 py-3.5 rounded-xl shadow-xl shadow-amber-500/15 transform hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer flex items-center gap-3">
+                <i data-lucide="eye" class="w-5 h-5"></i>
+                <span>Tampilkan Jawaban</span>
+              </button>
+            </div>
+
+            <!-- Jawaban & Penjelasan Panel (Hidden initially) -->
+            <div id="jawaban-panel" class="hidden space-y-8 pt-6 border-t-2 border-white/30 fade-in">
+              
+              <!-- Section Jawaban (Teal / Green theme, transparent glass-styled) -->
+              <div class="bg-emerald-500/10 backdrop-blur-md border-l-4 border-emerald-500 p-5 md:p-6 rounded-r-2xl space-y-2">
+                <div class="flex items-center gap-2 text-emerald-700">
+                  <i data-lucide="check-circle-2" class="w-5 h-5"></i>
+                  <span class="text-xs font-extrabold uppercase tracking-widest">Kunci Jawaban</span>
+                </div>
+                <p id="answer-text" class="text-2xl md:text-3xl font-bold text-emerald-950 leading-relaxed">
+                  Memuat Jawaban...
+                </p>
+              </div>
+
+              <!-- Section Penjelasan (Slate / Neutral theme, transparent glass-styled) -->
+              <div class="bg-slate-900/5 backdrop-blur-md border-l-4 border-slate-500 p-5 md:p-6 rounded-r-2xl space-y-2">
+                <div class="flex items-center gap-2 text-slate-600">
+                  <i data-lucide="file-text" class="w-5 h-5"></i>
+                  <span class="text-xs font-extrabold uppercase tracking-widest">Penjelasan Edukatif</span>
+                </div>
+                <p id="explanation-text" class="text-xl md:text-2xl text-slate-800 leading-relaxed">
+                  Memuat Penjelasan...
+                </p>
+              </div>
+
+              <!-- Kontrol setelah Jawaban muncul (sleeker buttons) -->
+              <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-white/30">
+                
+                <!-- Voice Speaker for Explanation -->
+                <button id="btn-read-explanation" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-blue-500/10 hover:bg-blue-500/20 text-blue-800 border border-blue-500/25 px-5 py-2.5 rounded-lg font-bold text-sm transition-all duration-300 cursor-pointer">
+                  <i data-lucide="volume-2" class="w-4 h-4"></i>
+                  <span>🔊 Bacakan Penjelasan</span>
+                </button>
+
+                <!-- Next Question Button -->
+                <button id="btn-next-question" class="w-full sm:w-auto flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-600 text-white px-6 py-2.5 rounded-lg font-bold text-sm shadow-lg shadow-brand-500/10 transition-all duration-300 cursor-pointer">
+                  <span>Soal Selanjutnya</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+
+          <!-- Reset Helper Score button -->
+          <div class="flex justify-center">
+            <button id="btn-reset-scores" class="flex items-center gap-2 text-slate-500 hover:text-red-600 font-semibold text-sm transition-all duration-300 cursor-pointer">
+              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+              <span>Reset Papan Skor</span>
+            </button>
+          </div>
+
+        </section>
+
+      </main>
+
+      <!-- ========================================================================= -->
+      <!-- FOOTER                                                                    -->
+      <!-- ========================================================================= -->
+      <footer class="bg-white/30 backdrop-blur-md border-t border-white/20 py-6">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-3 text-sm text-slate-500 font-medium">
+          <p>© 2026 GENIUS. Game Edukasi Nutri-Level Interaktif.</p>
+          <div class="flex items-center gap-4">
+            <span class="flex items-center gap-1">
+              <i data-lucide="heart" class="w-4 h-4 text-rose-400 fill-rose-400"></i> Untuk Ibu & Janin Sehat
+            </span>
+            <span class="text-slate-300">|</span>
+            <span>Uji Coba Nutri-Level A-B-C-D</span>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+
+    <!-- Script Utama (script.js) -->
+    <script src="script.js" defer></script>
+  </body>
+</html>
