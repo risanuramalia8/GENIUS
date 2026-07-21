@@ -31,14 +31,14 @@
 }
 
 .welcome-screen-bg {
-  background-image: linear-gradient(rgba(15, 23, 42, 0.15), rgba(15, 23, 42, 0.3)), url('/media_genius/home.jpg');
+  background-image: url('/media_genius/home.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
 
 .main-layout-bg {
-  background-image: linear-gradient(rgba(248, 250, 252, 0.4), rgba(248, 250, 252, 0.45)), url('/media_genius/dasar.jpg');
+  background-image: url('/media_genius/dasar.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

@@ -2,13 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import WelcomeScreen from "./components/WelcomeScreen";
 import Header from "./components/Header";
 import MateriTab from "./components/MateriTab";
+import VideoTab from "./components/VideoTab";
 import KuisTab from "./components/KuisTab";
 import Footer from "./components/Footer";
 import { SLIDES_DATA, KUIS_SOAL_DATA } from "./constants";
 
 export default function App() {
   const [isStarted, setIsStarted] = useState(false);
-  const [activeTab, setActiveTab] = useState<"materi" | "kuis">("materi");
+  const [activeTab, setActiveTab] = useState<"materi" | "video" | "kuis">("materi");
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [scoreGroupA, setScoreGroupA] = useState(0);
@@ -20,6 +21,7 @@ export default function App() {
   // Audio ref to maintain sound state across renders without extra dependencies
   const bgMusicRef = useRef<HTMLAudioElement | null>(null);
   const isMusicPlayingRef = useRef<boolean>(false);
+  const playPromiseRef = useRef<Promise<void> | null>(null);
 
   // Keep ref up to date with state
   useEffect(() => {
@@ -40,9 +42,6 @@ export default function App() {
     audio.volume = currentBgmVolume;
     bgMusicRef.current = audio;
 
-    // Berusaha memutar musik latar sesegera mungkin saat masuk homepage
-    playBackgroundMusic();
-
     // Web Speech API Voice Pre-fetch
     const handleVoicesChanged = () => {
       if ("speechSynthesis" in window) {
@@ -60,7 +59,16 @@ export default function App() {
         window.speechSynthesis.removeEventListener("voiceschanged", handleVoicesChanged);
       }
       if (bgMusicRef.current) {
-        bgMusicRef.current.pause();
+        const audioToPause = bgMusicRef.current;
+        if (playPromiseRef.current) {
+          playPromiseRef.current
+            .then(() => {
+              audioToPause.pause();
+            })
+            .catch(() => {});
+        } else {
+          audioToPause.pause();
+        }
         bgMusicRef.current = null;
       }
     };
@@ -79,13 +87,17 @@ export default function App() {
       if (!bgMusicRef.current) return;
 
       bgMusicRef.current.volume = currentBgmVolume;
-      bgMusicRef.current
-        .play()
+      const playPromise = bgMusicRef.current.play();
+      playPromiseRef.current = playPromise;
+
+      playPromise
         .then(() => {
           setIsMusicPlaying(true);
         })
         .catch((error) => {
-          console.warn("BGM Gagal diputar otomatis (mungkin file music.mp3 kosong atau butuh interaksi pengguna):", error);
+          if (error.name !== "AbortError") {
+            console.warn("BGM Gagal diputar otomatis (butuh interaksi pengguna):", error);
+          }
         });
     } catch (error) {
       console.warn("BGM Gagal diputar secara sinkron:", error);
@@ -93,14 +105,24 @@ export default function App() {
   };
 
   const pauseBackgroundMusic = () => {
+    setIsMusicPlaying(false);
     try {
       if (bgMusicRef.current) {
-        bgMusicRef.current.pause();
+        if (playPromiseRef.current) {
+          playPromiseRef.current
+            .then(() => {
+              if (bgMusicRef.current) {
+                bgMusicRef.current.pause();
+              }
+            })
+            .catch(() => {});
+        } else {
+          bgMusicRef.current.pause();
+        }
       }
     } catch (error) {
       console.warn("Gagal menghentikan BGM:", error);
     }
-    setIsMusicPlaying(false);
   };
 
   // Web Speech API speak engine
@@ -228,8 +250,10 @@ export default function App() {
                 currentSlideIndex={currentSlideIndex}
                 setCurrentSlideIndex={setCurrentSlideIndex}
                 slides={SLIDES_DATA}
-                onComplete={() => setActiveTab("kuis")}
+                onComplete={() => setActiveTab("video")}
               />
+            ) : activeTab === "video" ? (
+              <VideoTab />
             ) : (
               <KuisTab
                 currentQuestionIndex={currentQuestionIndex}
