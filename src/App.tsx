@@ -12,8 +12,6 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<"materi" | "video" | "kuis">("materi");
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [scoreGroupA, setScoreGroupA] = useState(0);
-  const [scoreGroupB, setScoreGroupB] = useState(0);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [currentBgmVolume, setCurrentBgmVolume] = useState(0.45);
   const [isAnswerShown, setIsAnswerShown] = useState(false);
@@ -266,10 +264,6 @@ export default function App() {
                 currentQuestionIndex={currentQuestionIndex}
                 setCurrentQuestionIndex={setCurrentQuestionIndex}
                 questions={KUIS_SOAL_DATA}
-                scoreGroupA={scoreGroupA}
-                setScoreGroupA={setScoreGroupA}
-                scoreGroupB={scoreGroupB}
-                setScoreGroupB={setScoreGroupB}
                 isAnswerShown={isAnswerShown}
                 setIsAnswerShown={setIsAnswerShown}
                 onSpeak={speakIndonesian}

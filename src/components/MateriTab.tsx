@@ -1,4 +1,5 @@
-import { Sparkles, AlertTriangle, HeartPulse, HelpCircle, ArrowLeft, ArrowRight, CheckCircle, Info, LucideIcon } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { ArrowRight, HelpCircle, Maximize2, Minimize2 } from "lucide-react";
 import { Slide } from "../types";
 
 interface MateriTabProps {
@@ -8,127 +9,128 @@ interface MateriTabProps {
   onComplete: () => void;
 }
 
-const iconMap: Record<string, LucideIcon> = {
-  "sparkles": Sparkles,
-  "alert-triangle": AlertTriangle,
-  "heart-pulse": HeartPulse,
-};
-
 export default function MateriTab({
-  currentSlideIndex,
-  setCurrentSlideIndex,
-  slides,
   onComplete,
 }: MateriTabProps) {
-  const currentSlide = slides[currentSlideIndex];
-  
-  if (!currentSlide) return null;
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  const IconComponent = iconMap[currentSlide.icon] || Info;
-  const BgIconComponent = iconMap[currentSlide.bgIcon] || Sparkles;
+  const toggleFullscreen = () => {
+    if (!containerRef.current) return;
 
-  const handlePrev = () => {
-    if (currentSlideIndex > 0) {
-      setCurrentSlideIndex(currentSlideIndex - 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentSlideIndex < slides.length - 1) {
-      setCurrentSlideIndex(currentSlideIndex + 1);
+    if (!document.fullscreenElement) {
+      containerRef.current.requestFullscreen().then(() => {
+        setIsFullscreen(true);
+      }).catch((err) => {
+        // Fallback to visual-only fullscreen overlay if native API is restricted by iframe sandbox
+        setIsFullscreen(true);
+        console.warn("Layar penuh standar dibatasi browser, menggunakan fallback visual:", err);
+      });
     } else {
-      onComplete();
+      if (document.fullscreenElement) {
+        document.exitFullscreen().catch(() => {
+          setIsFullscreen(false);
+        });
+      } else {
+        setIsFullscreen(false);
+      }
     }
   };
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => {
+      document.removeEventListener("fullscreenchange", handleFullscreenChange);
+    };
+  }, []);
+
+  // Escape key fallback for visual fullscreen
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isFullscreen) {
+        if (document.fullscreenElement) {
+          document.exitFullscreen().catch(() => {
+            setIsFullscreen(false);
+          });
+        } else {
+          setIsFullscreen(false);
+        }
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isFullscreen]);
 
   return (
-    <section id="content-materi" className="fade-in max-w-4xl mx-auto w-full space-y-8">
-      {/* Slide Container with modern glass shadow and elegant colors */}
-      <div className="bg-white/35 backdrop-blur-xl border border-white/50 rounded-3xl shadow-2xl overflow-hidden min-h-[420px] flex flex-col justify-between p-8 md:p-12 relative">
-        
-        {/* Beautiful background icon badge overlay */}
-        <div className="absolute right-8 top-8 opacity-5 text-brand-600 pointer-events-none">
-          <BgIconComponent className="w-48 h-48" />
-        </div>
-
-        {/* Header Slide Info */}
-        <div className="flex items-center justify-between z-10 border-b border-white/30 pb-6">
-          <span className="text-xs font-extrabold uppercase tracking-widest text-slate-500">
-            Nutri-Level Edu-Series
-          </span>
-          <div className="bg-white/50 backdrop-blur-sm text-brand-800 px-4 py-1 rounded-full text-xs font-bold border border-white/60">
-            Materi <span id="slide-index">{currentSlideIndex + 1}</span> dari{" "}
-            <span id="slide-total">{slides.length}</span>
-          </div>
-        </div>
-
-        {/* Slide Content Center (Optimized for LCD with giant, elegant text) */}
-        <div className="my-auto py-8 z-10 space-y-6">
-          <div className="flex items-center gap-4">
-            <div id="slide-badge-container" className="p-3 bg-brand-500/15 rounded-2xl text-brand-700">
-              <IconComponent className="w-7 h-7" />
-            </div>
-            <h3 id="slide-title" className="font-display font-bold text-2xl md:text-3xl text-slate-800">
-              {currentSlide.title}
-            </h3>
-          </div>
-          <p id="slide-text" className="text-3xl md:text-4xl font-semibold leading-relaxed text-slate-800 tracking-wide">
-            {currentSlide.text}
-          </p>
-        </div>
-
-        {/* Slide Navigations (sleeker, more compact) */}
-        <div className="flex items-center justify-between pt-6 border-t border-white/30 z-10">
+    <section id="content-materi" className="fade-in max-w-6xl mx-auto w-full space-y-8">
+      
+      {/* Presentasi Interaktif */}
+      <div 
+        ref={containerRef}
+        className={`transition-all duration-300 ${
+          isFullscreen 
+            ? "fixed inset-0 z-50 w-screen h-screen bg-slate-950 p-6 md:p-10 flex flex-col justify-center items-center space-y-6 overflow-hidden" 
+            : "bg-white/35 backdrop-blur-xl border border-white/50 rounded-3xl shadow-xl p-6 md:p-8 space-y-5"
+        }`}
+      >
+        <div className={`w-full flex justify-end ${isFullscreen ? "max-w-[90vw] md:max-w-[85vw]" : ""}`}>
           <button
-            onClick={handlePrev}
-            disabled={currentSlideIndex === 0}
-            id="btn-prev"
-            className="flex items-center gap-2 border border-slate-300 hover:border-brand-500 hover:text-brand-600 text-slate-600 font-bold px-5 py-2.5 rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer text-sm"
+            onClick={toggleFullscreen}
+            className={`flex items-center gap-2 font-bold px-4 py-2.5 rounded-xl transition-all duration-300 cursor-pointer text-sm shadow-sm ${
+              isFullscreen 
+                ? "bg-white/10 hover:bg-white/20 text-white border border-white/15" 
+                : "bg-brand-500/10 hover:bg-brand-500/20 text-brand-700 border border-brand-500/15"
+            }`}
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Sebelumnya</span>
-          </button>
-
-          {/* Progress Dots */}
-          <div className="flex gap-2.5 items-center">
-            {slides.map((_, idx) => (
-              <span
-                key={idx}
-                onClick={() => setCurrentSlideIndex(idx)}
-                className={`transition-all duration-300 cursor-pointer ${
-                  idx === currentSlideIndex
-                    ? "slide-dot w-6 h-3.5 rounded-full bg-brand-500"
-                    : "slide-dot w-3.5 h-3.5 rounded-full bg-slate-200 hover:bg-slate-300"
-                }`}
-              ></span>
-            ))}
-          </div>
-
-          <button
-            onClick={handleNext}
-            id="btn-next"
-            className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-bold px-6 py-2.5 rounded-xl shadow-lg shadow-brand-500/10 transition-all duration-300 cursor-pointer text-sm"
-          >
-            {currentSlideIndex === slides.length - 1 ? (
+            {isFullscreen ? (
               <>
-                <span>Selesai Belajar</span>
-                <CheckCircle className="w-5 h-5" />
+                <Minimize2 className="w-4 h-4" />
+                <span>Kecilkan Layar</span>
               </>
             ) : (
               <>
-                <span>Selanjutnya</span>
-                <ArrowRight className="w-4 h-4" />
+                <Maximize2 className="w-4 h-4" />
+                <span>Layar Penuh</span>
               </>
             )}
           </button>
         </div>
 
+        <div className={`relative w-full overflow-hidden rounded-2xl shadow-md border mx-auto transition-all duration-300 ${
+          isFullscreen 
+            ? "max-w-[90vw] md:max-w-[85vw] border-slate-800/80 shadow-2xl shadow-black/50" 
+            : "max-w-none border-slate-200/50"
+        }`} style={{ paddingBottom: "56.25%" }}>
+          <iframe
+            src="https://www.canva.com/design/DAHQAYPURuo/neEpHAlSzONYWXs_85ErTQ/view?embed"
+            allowFullScreen={true}
+            allow="fullscreen"
+            loading="lazy"
+            className="absolute top-0 left-0 w-full h-full border-0 rounded-2xl"
+            title="Presentasi Interaktif Canva - Nutri-Level"
+          ></iframe>
+        </div>
+      </div>
+
+      {/* Navigation button to proceed */}
+      <div className="flex justify-center pt-2">
+        <button
+          onClick={onComplete}
+          className="flex items-center gap-2 bg-brand-500 hover:bg-brand-600 text-white font-bold px-8 py-3.5 rounded-2xl shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30 transition-all duration-300 cursor-pointer text-base transform hover:-translate-y-0.5 active:translate-y-0"
+        >
+          <span>Selesai Belajar & Lanjut ke Video</span>
+          <ArrowRight className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Helper Tips */}
       <p className="text-center text-slate-400 font-medium text-sm flex items-center justify-center gap-1">
         <HelpCircle className="w-4 h-4 text-slate-400" />
-        <span>Gunakan tombol di atas untuk membaca materi edukasi lainnya.</span>
+        <span>Gunakan kontrol di dalam presentasi Canva untuk melihat materi selengkapnya atau klik tombol Layar Penuh di atas.</span>
       </p>
     </section>
   );

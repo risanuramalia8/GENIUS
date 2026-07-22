@@ -1,15 +1,10 @@
-import { useState } from "react";
-import { Users, Minus, Plus, Volume2, Eye, CheckCircle2, FileText, ArrowRight, RefreshCw } from "lucide-react";
+import { Volume2, Eye, CheckCircle2, FileText, ArrowRight } from "lucide-react";
 import { Question } from "../types";
 
 interface KuisTabProps {
   currentQuestionIndex: number;
   setCurrentQuestionIndex: (idx: number) => void;
   questions: Question[];
-  scoreGroupA: number;
-  setScoreGroupA: (score: number | ((prev: number) => number)) => void;
-  scoreGroupB: number;
-  setScoreGroupB: (score: number | ((prev: number) => number)) => void;
   isAnswerShown: boolean;
   setIsAnswerShown: (shown: boolean) => void;
   onSpeak: (text: string) => void;
@@ -19,38 +14,11 @@ export default function KuisTab({
   currentQuestionIndex,
   setCurrentQuestionIndex,
   questions,
-  scoreGroupA,
-  setScoreGroupA,
-  scoreGroupB,
-  setScoreGroupB,
   isAnswerShown,
   setIsAnswerShown,
   onSpeak,
 }: KuisTabProps) {
-  const [isResetConfirming, setIsResetConfirming] = useState(false);
   const currentQuestion = questions[currentQuestionIndex];
-
-  const handleMinusA = () => {
-    setScoreGroupA((prev) => Math.max(0, prev - 1));
-  };
-
-  const handlePlusA = () => {
-    setScoreGroupA((prev) => prev + 1);
-  };
-
-  const handleMinusB = () => {
-    setScoreGroupB((prev) => Math.max(0, prev - 1));
-  };
-
-  const handlePlusB = () => {
-    setScoreGroupB((prev) => prev + 1);
-  };
-
-  const handleResetScores = () => {
-    setScoreGroupA(0);
-    setScoreGroupB(0);
-    setIsResetConfirming(false);
-  };
 
   const handleReadQuestion = () => {
     if (currentQuestion) {
@@ -72,81 +40,6 @@ export default function KuisTab({
 
   return (
     <section id="content-kuis" className="fade-in w-full space-y-8">
-      {/* Papan Skor (Scoreboard) */}
-      <div className="grid grid-cols-2 gap-6 max-w-4xl mx-auto">
-        {/* Score Kelompok A */}
-        <div className="bg-white/40 backdrop-blur-xl border-2 border-white/50 rounded-3xl p-5 shadow-xl relative overflow-hidden flex flex-col items-center justify-between min-h-[220px]">
-          {/* Decorative corner color */}
-          <div className="absolute top-0 left-0 w-3 h-full bg-brand-500"></div>
-
-          <div className="text-center space-y-1">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-brand-600 block">
-              KUIS GRUP
-            </span>
-            <h4 className="font-display font-bold text-xl text-slate-800 flex items-center gap-2 justify-center">
-              <Users className="w-5 h-5 text-brand-500" /> Kelompok A
-            </h4>
-          </div>
-
-          {/* Huge Score display */}
-          <div className="font-display font-bold text-6xl md:text-7xl text-slate-800 my-3 select-none tracking-tight">
-            {scoreGroupA}
-          </div>
-
-          {/* Manual Admin Incrementors */}
-          <div className="flex gap-2">
-            <button
-              onClick={handleMinusA}
-              className="bg-white/60 hover:bg-white border border-slate-200 text-slate-600 p-2.5 rounded-xl transition-all duration-300 cursor-pointer shadow-sm"
-            >
-              <Minus className="w-4 h-4" />
-            </button>
-            <button
-              onClick={handlePlusA}
-              className="bg-brand-500 hover:bg-brand-600 text-white p-2.5 rounded-xl transition-all duration-300 cursor-pointer shadow-lg shadow-brand-500/15"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Score Kelompok B */}
-        <div className="bg-white/40 backdrop-blur-xl border-2 border-white/50 rounded-3xl p-5 shadow-xl relative overflow-hidden flex flex-col items-center justify-between min-h-[220px]">
-          {/* Decorative corner color */}
-          <div className="absolute top-0 right-0 w-3 h-full bg-indigo-500"></div>
-
-          <div className="text-center space-y-1">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-indigo-600 block">
-              KUIS GRUP
-            </span>
-            <h4 className="font-display font-bold text-xl text-slate-800 flex items-center gap-2 justify-center">
-              <Users className="w-5 h-5 text-indigo-500" /> Kelompok B
-            </h4>
-          </div>
-
-          {/* Huge Score display */}
-          <div className="font-display font-bold text-6xl md:text-7xl text-slate-800 my-3 select-none tracking-tight">
-            {scoreGroupB}
-          </div>
-
-          {/* Manual Admin Incrementors */}
-          <div className="flex gap-2">
-            <button
-              onClick={handleMinusB}
-              className="bg-white/60 hover:bg-white border border-slate-200 text-slate-600 p-2.5 rounded-xl transition-all duration-300 cursor-pointer shadow-sm"
-            >
-              <Minus className="w-4 h-4" />
-            </button>
-            <button
-              onClick={handlePlusB}
-              className="bg-indigo-500 hover:bg-indigo-600 text-white p-2.5 rounded-xl transition-all duration-300 cursor-pointer shadow-lg shadow-indigo-500/15"
-            >
-              <Plus className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Tampilan Soal & Jawaban Panel */}
       <div className="max-w-4xl mx-auto bg-white/35 backdrop-blur-xl border border-white/50 rounded-3xl shadow-2xl p-8 md:p-12 relative space-y-8">
         {/* Badging and Voice Button Header */}
@@ -241,35 +134,6 @@ export default function KuisTab({
               </button>
             </div>
           </div>
-        )}
-      </div>
-
-      {/* Reset Helper Score button with inline confirmation */}
-      <div className="flex justify-center">
-        {isResetConfirming ? (
-          <div className="flex items-center gap-3 bg-red-50/80 border border-red-200 px-4 py-2 rounded-2xl shadow-sm">
-            <span className="text-xs font-bold text-red-700">Yakin ingin me-reset semua skor?</span>
-            <button
-              onClick={handleResetScores}
-              className="bg-red-500 hover:bg-red-600 text-white text-xs font-bold px-3 py-1.5 rounded-lg cursor-pointer transition-all duration-200"
-            >
-              Ya, Reset
-            </button>
-            <button
-              onClick={() => setIsResetConfirming(false)}
-              className="text-slate-500 hover:text-slate-700 text-xs font-semibold cursor-pointer transition-all duration-200"
-            >
-              Batal
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={() => setIsResetConfirming(true)}
-            className="flex items-center gap-2 text-slate-500 hover:text-red-600 font-semibold text-sm transition-all duration-300 cursor-pointer"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Reset Papan Skor</span>
-          </button>
         )}
       </div>
     </section>
